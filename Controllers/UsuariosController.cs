@@ -104,16 +104,7 @@ namespace Cyra.Controllers
             usuario.Nombre = model.Nombre;
             usuario.Telefono = model.Telefono;
             usuario.Direccion = model.Direccion;
-
-            // Convertir string a enum
-            if (Enum.TryParse<EstadoUsuarioType>(model.Estado, true, out var estado))
-            {
-                usuario.Estado = estado;
-            }
-            else
-            {
-                return BadRequest(new { message = "El estado enviado no es válido." });
-            }
+            usuario.Estado = model.Estado;
 
             // Guardar cambios
             var actualizado = await _usuarioRepository.UpdateAsync(usuario);
