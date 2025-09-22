@@ -1,6 +1,6 @@
 ﻿using Cyra.Data;
 using Cyra.Models;
-using Cyra.Repositories;
+using Cyra.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
