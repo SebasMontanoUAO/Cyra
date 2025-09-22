@@ -1,6 +1,6 @@
 ﻿using Cyra.Data;
 
-namespace Cyra.Repositories
+namespace Cyra.Repositories.Interfaces
 {
     public interface IEnvioRepository
     {

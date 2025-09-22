@@ -1,4 +1,5 @@
 ﻿using Cyra.Data;
+using Cyra.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cyra.Repositories
