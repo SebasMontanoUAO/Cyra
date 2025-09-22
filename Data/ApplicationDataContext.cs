@@ -1,17 +1,14 @@
-﻿using Cyra.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Cyra.Models; // Asegúrate de que tus modelos estén en este namespace
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cyra.Data
 {
     public class ApplicationDataContext : DbContext
     {
-        public ApplicationDataContext(DbContextOptions<ApplicationDataContext> options): base(options) { }
+        public ApplicationDataContext(DbContextOptions<ApplicationDataContext> options) : base(options) { }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-
-        }
-
+        // DbSets para todas las tablas
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Vendedor> Vendedores { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
@@ -28,6 +25,8 @@ namespace Cyra.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             // Configurar enums para PostgreSQL
             modelBuilder.HasPostgresEnum<EstadoUsuarioType>();
             modelBuilder.HasPostgresEnum<EstadoPublicacionType>();
@@ -186,14 +185,6 @@ namespace Cyra.Data
                 .HasIndex(p => p.FechaPublicacion)
                 .HasDatabaseName("idx_producto_fecha_publicacion");
 
-            // Índices para búsqueda full-text (PostgreSQL específico)
-            modelBuilder.Entity<Producto>()
-                .HasIndex(p => new { })
-                .HasMethod("GIN")
-                .HasOperators("gin_trgm_ops")
-                .HasFilter("estado_publicacion = 'ACTIVO'")
-                .HasDatabaseName("idx_producto_busqueda_texto");
-
             // Índices para ImagenProducto
             modelBuilder.Entity<ImagenProducto>()
                 .HasIndex(ip => ip.IdProducto)
@@ -211,11 +202,11 @@ namespace Cyra.Data
             // Índices para DetallePedido
             modelBuilder.Entity<DetallePedido>()
                 .HasIndex(dp => dp.IdPedido)
-                .HasDatabaseName("idx_pedido");
+                .HasDatabaseName("idx_detallepedido_pedido");
 
             modelBuilder.Entity<DetallePedido>()
                 .HasIndex(dp => dp.IdProducto)
-                .HasDatabaseName("idx_producto_pedido");
+                .HasDatabaseName("idx_detallepedido_producto");
 
             // Índices para Pago
             modelBuilder.Entity<Pago>()
@@ -251,23 +242,25 @@ namespace Cyra.Data
             modelBuilder.Entity<Producto>()
                 .HasCheckConstraint("CK_Producto_Stock", "stock >= 0");
 
-            // Constraints para DetalleCarrito y DetallePedido
+            // Constraints para DetalleCarrito
             modelBuilder.Entity<DetalleCarrito>()
                 .HasCheckConstraint("CK_DetalleCarrito_Cantidad", "cantidad > 0");
 
             modelBuilder.Entity<DetalleCarrito>()
                 .HasCheckConstraint("CK_DetalleCarrito_Precio", "precio_unitario >= 0");
 
+            // Constraints para DetallePedido
             modelBuilder.Entity<DetallePedido>()
                 .HasCheckConstraint("CK_DetallePedido_Cantidad", "cantidad > 0");
 
             modelBuilder.Entity<DetallePedido>()
                 .HasCheckConstraint("CK_DetallePedido_Precio", "precio_unitario >= 0");
 
-            // Constraints para Pedido y Pago
+            // Constraints para Pedido
             modelBuilder.Entity<Pedido>()
                 .HasCheckConstraint("CK_Pedido_Total", "total >= 0");
 
+            // Constraints para Pago
             modelBuilder.Entity<Pago>()
                 .HasCheckConstraint("CK_Pago_Monto", "monto >= 0");
         }
