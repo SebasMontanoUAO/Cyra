@@ -115,10 +115,10 @@ namespace Cyra.Controllers
             }
 
             // Guardar cambios
-            var actualizado = await _usuarioRepo.UpdateAsync(usuario);
+            var actualizado = await _usuarioRepository.UpdateAsync(usuario);
 
             // Respuesta
-            var response = new UsuarioResponse
+            var response = new UsuarioResponseModel
             {
                 IdUsuario = actualizado.IdUsuario,
                 Nombre = actualizado.Nombre,
