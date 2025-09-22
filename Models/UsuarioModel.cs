@@ -38,6 +38,24 @@ namespace Cyra.Models
         [RegularExpression("CLIENTE|VENDEDOR", ErrorMessage = "El tipo de usuario debe ser CLIENTE o VENDEDOR.")]
         public string TipoUsuario { get; set; }
     }
+
+    public class UsuarioUpdateModel
+    {
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        [StringLength(100, ErrorMessage = "El nombre no puede superar los 100 caracteres.")]
+        public string Nombre { get; set; }
+
+        [StringLength(20, ErrorMessage = "El teléfono no puede superar los 20 caracteres.")]
+        public string Telefono { get; set; }
+
+        [StringLength(200, ErrorMessage = "La dirección no puede superar los 200 caracteres.")]
+        public string Direccion { get; set; }
+
+        [Required(ErrorMessage = "El estado es obligatorio.")]
+        [RegularExpression("ACTIVO|INACTIVO|SUSPENDIDO",
+            ErrorMessage = "El estado debe ser ACTIVO, INACTIVO o SUSPENDIDO.")]
+        public string Estado { get; set; }
+    }
     public class UsuarioLoginModel
     {
 

@@ -18,6 +18,24 @@ namespace Cyra.Controllers
             _usuarioRepository = usuarioRepository;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var usuarios = await _usuarioRepository.GetAllAsync();
+            var response = usuarios.Select(u => new UsuarioResponseModel
+            {
+                IdUsuario = u.IdUsuario,
+                Nombre = u.Nombre,
+                Email = u.Email,
+                Telefono = u.Telefono,
+                Direccion = u.Direccion,
+                FechaCreacion = u.FechaCreacion,
+                Estado = u.Estado.ToString(),
+                TipoUsuario = u.TipoUsuario
+            });
+            return Ok(response);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -38,8 +56,8 @@ namespace Cyra.Controllers
         }
 
         // POST api/usuarios/register
-        [HttpPost("register")]
-        public async Task<IActionResult> RegistrarUsuario([FromBody] UsuarioRegisterModel usuarioRegistro)
+        [HttpPost]
+        public async Task<IActionResult> Crear([FromBody] UsuarioRegisterModel usuarioRegistro)
         {
             var usuarioExistente = await _usuarioRepository.GetByEmailAsync(usuarioRegistro.Email);
             if (usuarioExistente != null)
@@ -67,6 +85,50 @@ namespace Cyra.Controllers
                 Estado = nuevoUsuario.Estado.ToString(),
                 TipoUsuario = nuevoUsuario.TipoUsuario
             });
+        }
+
+        // PUT: api/usuario/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Actualizar(int id, [FromBody] UsuarioUpdateModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Buscar el usuario existente
+            var usuario = await _usuarioRepository.GetByIdAsync(id);
+            if (usuario == null)
+                return NotFound(new { message = $"No se encontró el usuario con Id {id}" });
+
+            // Mapear datos desde el modelo
+            usuario.Nombre = model.Nombre;
+            usuario.Telefono = model.Telefono;
+            usuario.Direccion = model.Direccion;
+
+            // Convertir string a enum
+            if (Enum.TryParse<EstadoUsuarioType>(model.Estado, true, out var estado))
+            {
+                usuario.Estado = estado;
+            }
+            else
+            {
+                return BadRequest(new { message = "El estado enviado no es válido." });
+            }
+
+            // Guardar cambios
+            var actualizado = await _usuarioRepo.UpdateAsync(usuario);
+
+            // Respuesta
+            var response = new UsuarioResponse
+            {
+                IdUsuario = actualizado.IdUsuario,
+                Nombre = actualizado.Nombre,
+                Email = actualizado.Email,
+                Telefono = actualizado.Telefono,
+                Direccion = actualizado.Direccion,
+                Estado = actualizado.Estado.ToString()
+            };
+
+            return Ok(response);
         }
     }
 }
