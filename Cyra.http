@@ -1,0 +1,6 @@
+@Cyra_HostAddress = http://localhost:5235
+
+GET {{Cyra_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
