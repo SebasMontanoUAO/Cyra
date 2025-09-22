@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Cyra.Data.Migrations
 {
     [DbContext(typeof(ApplicationDataContext))]
-    [Migration("20250922211807_InitialCreateFixedConstraints")]
-    partial class InitialCreateFixedConstraints
+    [Migration("20250922215138_InitialCreateFixedIndexes")]
+    partial class InitialCreateFixedIndexes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,12 +24,6 @@ namespace Cyra.Data.Migrations
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "estado_carrito_type", new[] { "activo", "abandonado", "finalizado" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "estado_envio_type", new[] { "pendiente", "empacando", "en_transito", "entregado", "cancelado" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "estado_pago_type", new[] { "pendiente", "procesando", "completado", "rechazado", "reembolsado" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "estado_pedido_type", new[] { "pendiente", "confirmado", "preparacion", "enviado", "entregado", "cancelado" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "estado_publicacion_type", new[] { "borrador", "activo", "pausado", "agotado", "eliminado" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "estado_usuario_type", new[] { "activo", "inactivo", "suspendido" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Cyra.Data.Carrito", b =>
@@ -40,8 +34,10 @@ namespace Cyra.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("IdCarrito"));
 
-                    b.Property<int>("EstadoCarrito")
-                        .HasColumnType("estado_carrito_type");
+                    b.Property<string>("EstadoCarrito")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("timestamp without time zone");
@@ -56,9 +52,12 @@ namespace Cyra.Data.Migrations
 
                     b.HasIndex("IdCliente", "FechaCreacion")
                         .HasDatabaseName("idx_carrito_activo")
-                        .HasFilter("estado_carrito = 'ACTIVO'");
+                        .HasFilter("\"EstadoCarrito\" = 'ACTIVO'");
 
-                    b.ToTable("Carrito", "New_schema");
+                    b.ToTable("Carrito", "New_schema", t =>
+                        {
+                            t.HasCheckConstraint("CK_Carrito_EstadoCarrito", "\"EstadoCarrito\" IN ('ACTIVO', 'ABANDONADO', 'FINALIZADO')");
+                        });
                 });
 
             modelBuilder.Entity("Cyra.Data.Categoria", b =>
@@ -162,8 +161,10 @@ namespace Cyra.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("EstadoEnvio")
-                        .HasColumnType("integer");
+                    b.Property<string>("EstadoEnvio")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<long>("IdPedido")
                         .HasColumnType("bigint");
@@ -178,7 +179,10 @@ namespace Cyra.Data.Migrations
                     b.HasIndex("IdPedido")
                         .HasDatabaseName("idx_envio_pedido");
 
-                    b.ToTable("Envio", "New_schema");
+                    b.ToTable("Envio", "New_schema", t =>
+                        {
+                            t.HasCheckConstraint("CK_Envio_EstadoEnvio", "\"EstadoEnvio\" IN ('PENDIENTE', 'EMPACANDO', 'EN_TRANSITO', 'ENTREGADO', 'CANCELADO')");
+                        });
                 });
 
             modelBuilder.Entity("Cyra.Data.ImagenProducto", b =>
@@ -216,8 +220,10 @@ namespace Cyra.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("IdPago"));
 
-                    b.Property<int>("EstadoPago")
-                        .HasColumnType("estado_pago_type");
+                    b.Property<string>("EstadoPago")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("FechaPago")
                         .HasColumnType("timestamp without time zone");
@@ -240,6 +246,8 @@ namespace Cyra.Data.Migrations
 
                     b.ToTable("Pagos", "New_schema", t =>
                         {
+                            t.HasCheckConstraint("CK_Pago_EstadoPago", "\"EstadoPago\" IN ('PENDIENTE', 'PROCESANDO', 'COMPLETADO', 'RECHAZADO', 'REEMBOLSADO')");
+
                             t.HasCheckConstraint("CK_Pago_Monto", "\"Monto\" >= 0");
                         });
                 });
@@ -252,8 +260,10 @@ namespace Cyra.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("IdPedido"));
 
-                    b.Property<int>("EstadoPedido")
-                        .HasColumnType("estado_pedido_type");
+                    b.Property<string>("EstadoPedido")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("FechaPedido")
                         .HasColumnType("timestamp without time zone");
@@ -274,6 +284,8 @@ namespace Cyra.Data.Migrations
 
                     b.ToTable("Pedido", "New_schema", t =>
                         {
+                            t.HasCheckConstraint("CK_Pedido_EstadoPedido", "\"EstadoPedido\" IN ('PENDIENTE', 'CONFIRMADO', 'PREPARACION', 'ENVIADO', 'ENTREGADO', 'CANCELADO')");
+
                             t.HasCheckConstraint("CK_Pedido_Total", "\"Total\" >= 0");
                         });
                 });
@@ -290,8 +302,10 @@ namespace Cyra.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("EstadoPublicacion")
-                        .HasColumnType("integer");
+                    b.Property<string>("EstadoPublicacion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("FechaPublicacion")
                         .HasColumnType("timestamp without time zone");
@@ -313,7 +327,7 @@ namespace Cyra.Data.Migrations
                     b.HasKey("IdProducto");
 
                     b.HasIndex("EstadoPublicacion")
-                        .HasDatabaseName("idx_estado_ubicacion");
+                        .HasDatabaseName("idx_producto_estado_publicacion");
 
                     b.HasIndex("FechaPublicacion")
                         .HasDatabaseName("idx_producto_fecha_publicacion");
@@ -323,6 +337,8 @@ namespace Cyra.Data.Migrations
 
                     b.ToTable("Producto", "New_schema", t =>
                         {
+                            t.HasCheckConstraint("CK_Producto_EstadoPublicacion", "\"EstadoPublicacion\" IN ('BORRADOR', 'ACTIVO', 'PAUSADO', 'AGOTADO', 'ELIMINADO')");
+
                             t.HasCheckConstraint("CK_Producto_Precio", "\"Precio\" >= 0");
 
                             t.HasCheckConstraint("CK_Producto_Stock", "\"Stock\" >= 0");
@@ -362,8 +378,10 @@ namespace Cyra.Data.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<int>("Estado")
-                        .HasColumnType("integer");
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("timestamp without time zone");
@@ -392,6 +410,8 @@ namespace Cyra.Data.Migrations
 
                     b.ToTable("Usuario", "New_schema", t =>
                         {
+                            t.HasCheckConstraint("CK_Usuario_Estado", "\"Estado\" IN ('ACTIVO', 'INACTIVO', 'SUSPENDIDO')");
+
                             t.HasCheckConstraint("CK_Usuario_TipoUsuario", "\"TipoUsuario\" IN ('CLIENTE', 'VENDEDOR')");
                         });
                 });

@@ -197,7 +197,7 @@ namespace Cyra.Data
 
             modelBuilder.Entity<Producto>()
                 .HasIndex(p => p.EstadoPublicacion)
-                .HasDatabaseName("idx_estado_ubicacion");
+                .HasDatabaseName("idx_producto_estado_publicacion");
 
             modelBuilder.Entity<Producto>()
                 .HasIndex(p => p.FechaPublicacion)
@@ -236,14 +236,15 @@ namespace Cyra.Data
                 .HasIndex(e => e.IdPedido)
                 .HasDatabaseName("idx_envio_pedido");
 
-            // Índices para Carrito
+            // Índices para Carrito - CORREGIDOS
             modelBuilder.Entity<Carrito>()
                 .HasIndex(c => c.IdCliente)
                 .HasDatabaseName("idx_carrito_cliente");
 
+            // ✅ CORREGIDO: Usar el nombre correcto de la columna entre comillas
             modelBuilder.Entity<Carrito>()
                 .HasIndex(c => new { c.IdCliente, c.FechaCreacion })
-                .HasFilter("estado_carrito = 'ACTIVO'")
+                .HasFilter("\"EstadoCarrito\" = 'ACTIVO'")  // ← NOMBRE CORRECTO ENTRE COMILLAS
                 .HasDatabaseName("idx_carrito_activo");
         }
 

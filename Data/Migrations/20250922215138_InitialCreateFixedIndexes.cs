@@ -7,21 +7,13 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Cyra.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateFixedConstraints : Migration
+    public partial class InitialCreateFixedIndexes : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
                 name: "New_schema");
-
-            migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:estado_carrito_type", "activo,abandonado,finalizado")
-                .Annotation("Npgsql:Enum:estado_envio_type", "pendiente,empacando,en_transito,entregado,cancelado")
-                .Annotation("Npgsql:Enum:estado_pago_type", "pendiente,procesando,completado,rechazado,reembolsado")
-                .Annotation("Npgsql:Enum:estado_pedido_type", "pendiente,confirmado,preparacion,enviado,entregado,cancelado")
-                .Annotation("Npgsql:Enum:estado_publicacion_type", "borrador,activo,pausado,agotado,eliminado")
-                .Annotation("Npgsql:Enum:estado_usuario_type", "activo,inactivo,suspendido");
 
             migrationBuilder.CreateTable(
                 name: "Categoria",
@@ -50,12 +42,13 @@ namespace Cyra.Data.Migrations
                     Telefono = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     Direccion = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    Estado = table.Column<int>(type: "integer", nullable: false),
+                    Estado = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     TipoUsuario = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Usuario", x => x.IdUsuario);
+                    table.CheckConstraint("CK_Usuario_Estado", "\"Estado\" IN ('ACTIVO', 'INACTIVO', 'SUSPENDIDO')");
                     table.CheckConstraint("CK_Usuario_TipoUsuario", "\"TipoUsuario\" IN ('CLIENTE', 'VENDEDOR')");
                 });
 
@@ -112,11 +105,12 @@ namespace Cyra.Data.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FechaCreacion = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     IdCliente = table.Column<long>(type: "bigint", nullable: false),
-                    EstadoCarrito = table.Column<int>(type: "estado_carrito_type", nullable: false)
+                    EstadoCarrito = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Carrito", x => x.IdCarrito);
+                    table.CheckConstraint("CK_Carrito_EstadoCarrito", "\"EstadoCarrito\" IN ('ACTIVO', 'ABANDONADO', 'FINALIZADO')");
                     table.ForeignKey(
                         name: "FK_Carrito_Cliente_IdCliente",
                         column: x => x.IdCliente,
@@ -135,12 +129,13 @@ namespace Cyra.Data.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FechaPedido = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Total = table.Column<decimal>(type: "numeric(12,2)", nullable: false),
-                    EstadoPedido = table.Column<int>(type: "estado_pedido_type", nullable: false),
+                    EstadoPedido = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     IdCliente = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pedido", x => x.IdPedido);
+                    table.CheckConstraint("CK_Pedido_EstadoPedido", "\"EstadoPedido\" IN ('PENDIENTE', 'CONFIRMADO', 'PREPARACION', 'ENVIADO', 'ENTREGADO', 'CANCELADO')");
                     table.CheckConstraint("CK_Pedido_Total", "\"Total\" >= 0");
                     table.ForeignKey(
                         name: "FK_Pedido_Cliente_IdCliente",
@@ -162,13 +157,14 @@ namespace Cyra.Data.Migrations
                     Descripcion = table.Column<string>(type: "text", nullable: false),
                     Precio = table.Column<decimal>(type: "numeric(12,2)", nullable: false),
                     Stock = table.Column<int>(type: "integer", nullable: false),
-                    EstadoPublicacion = table.Column<int>(type: "integer", nullable: false),
+                    EstadoPublicacion = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     FechaPublicacion = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     IdVendedor = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Producto", x => x.IdProducto);
+                    table.CheckConstraint("CK_Producto_EstadoPublicacion", "\"EstadoPublicacion\" IN ('BORRADOR', 'ACTIVO', 'PAUSADO', 'AGOTADO', 'ELIMINADO')");
                     table.CheckConstraint("CK_Producto_Precio", "\"Precio\" >= 0");
                     table.CheckConstraint("CK_Producto_Stock", "\"Stock\" >= 0");
                     table.ForeignKey(
@@ -189,12 +185,13 @@ namespace Cyra.Data.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     DireccionEnvio = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     NumeroTelefonoReceptor = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    EstadoEnvio = table.Column<int>(type: "integer", nullable: false),
+                    EstadoEnvio = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     IdPedido = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Envio", x => x.IdEnvio);
+                    table.CheckConstraint("CK_Envio_EstadoEnvio", "\"EstadoEnvio\" IN ('PENDIENTE', 'EMPACANDO', 'EN_TRANSITO', 'ENTREGADO', 'CANCELADO')");
                     table.ForeignKey(
                         name: "FK_Envio_Pedido_IdPedido",
                         column: x => x.IdPedido,
@@ -212,7 +209,7 @@ namespace Cyra.Data.Migrations
                     IdPago = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MetodoPago = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    EstadoPago = table.Column<int>(type: "estado_pago_type", nullable: false),
+                    EstadoPago = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     FechaPago = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     Monto = table.Column<decimal>(type: "numeric(12,2)", nullable: false),
                     IdPedido = table.Column<long>(type: "bigint", nullable: false)
@@ -220,6 +217,7 @@ namespace Cyra.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pagos", x => x.IdPago);
+                    table.CheckConstraint("CK_Pago_EstadoPago", "\"EstadoPago\" IN ('PENDIENTE', 'PROCESANDO', 'COMPLETADO', 'RECHAZADO', 'REEMBOLSADO')");
                     table.CheckConstraint("CK_Pago_Monto", "\"Monto\" >= 0");
                     table.ForeignKey(
                         name: "FK_Pagos_Pedido_IdPedido",
@@ -347,7 +345,7 @@ namespace Cyra.Data.Migrations
                 schema: "New_schema",
                 table: "Carrito",
                 columns: new[] { "IdCliente", "FechaCreacion" },
-                filter: "estado_carrito = 'ACTIVO'");
+                filter: "\"EstadoCarrito\" = 'ACTIVO'");
 
             migrationBuilder.CreateIndex(
                 name: "idx_carrito_cliente",
@@ -404,7 +402,7 @@ namespace Cyra.Data.Migrations
                 column: "FechaPedido");
 
             migrationBuilder.CreateIndex(
-                name: "idx_estado_ubicacion",
+                name: "idx_producto_estado_publicacion",
                 schema: "New_schema",
                 table: "Producto",
                 column: "EstadoPublicacion");
