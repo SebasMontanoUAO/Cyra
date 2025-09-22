@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Cyra.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cyra.Data
 {
