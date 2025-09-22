@@ -6,7 +6,12 @@ namespace Cyra.Data
     public class ApplicationDataContext : DbContext
     {
         public ApplicationDataContext(DbContextOptions<ApplicationDataContext> options): base(options) { }
-        // DbSets para todas las tablas
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+
+        }
+
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Vendedor> Vendedores { get; set; }
         public DbSet<Cliente> Clientes { get; set; }

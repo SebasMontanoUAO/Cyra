@@ -14,7 +14,7 @@ namespace Cyra.Data
 
         // Navigation properties
         public virtual Usuario Usuario { get; set; }
-        public virtual ICollection<Carrito> Carritos { get; set; }
-        public virtual ICollection<Pedido> Pedidos { get; set; }
+        //public virtual ICollection<Carrito> Carritos { get; set; }
+        //public virtual ICollection<Pedido> Pedidos { get; set; }
     }
 }
