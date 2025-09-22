@@ -29,8 +29,8 @@ namespace Cyra.Data
 
         // Navigation properties
         public virtual Cliente Cliente { get; set; }
-        public virtual ICollection<DetallePedido> Detalles { get; set; }
-        public virtual ICollection<Pago> Pagos { get; set; }
-        public virtual ICollection<Envio> Envios { get; set; }
+        public virtual ICollection<DetallePedido> Detalles { get; set; } = new List<DetallePedido>();
+        public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();
+        public virtual ICollection<Envio> Envios { get; set; } = new List<Envio>();
     }
 }
