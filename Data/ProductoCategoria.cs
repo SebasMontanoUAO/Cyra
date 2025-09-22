@@ -6,13 +6,10 @@ namespace Cyra.Data
     [Table("Producto_categoria", Schema = "New_schema")]
     public class ProductoCategoria
     {
-        [Key]
-        [Column(Order = 1)]
+        // ❌ NO usar [Key] aquí
         [ForeignKey("Producto")]
         public long IdProducto { get; set; }
 
-        [Key]
-        [Column(Order = 2)]
         [ForeignKey("Categoria")]
         public long IdCategoria { get; set; }
 

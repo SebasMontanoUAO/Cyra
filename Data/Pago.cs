@@ -3,8 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cyra.Data
 {
-    public enum EstadoPagoType { PENDIENTE, PROCESANDO, COMPLETADO, RECHAZADO, REEMBOLSADO }
-
     [Table("Pagos", Schema = "New_schema")]
     public class Pago
     {
@@ -17,8 +15,8 @@ namespace Cyra.Data
         public string MetodoPago { get; set; }
 
         [Required]
-        [Column(TypeName = "estado_pago_type")]
-        public EstadoPagoType EstadoPago { get; set; } = EstadoPagoType.PENDIENTE;
+        [StringLength(20)]
+        public string EstadoPago { get; set; } = "PENDIENTE";  // "PENDIENTE", "PROCESANDO", "COMPLETADO", "RECHAZADO", "REEMBOLSADO"
 
         public DateTime? FechaPago { get; set; }
 

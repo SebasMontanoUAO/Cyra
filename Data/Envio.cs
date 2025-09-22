@@ -3,8 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cyra.Data
 {
-    public enum EstadoEnvioType { PENDIENTE, EMPACANDO, EN_TRANSITO, ENTREGADO, CANCELADO }
-
     [Table("Envio", Schema = "New_schema")]
     public class Envio
     {
@@ -21,8 +19,8 @@ namespace Cyra.Data
         public string NumeroTelefonoReceptor { get; set; }
 
         [Required]
-        [Column(TypeName = "estado_envio_type")]
-        public EstadoEnvioType EstadoEnvio { get; set; } = EstadoEnvioType.PENDIENTE;
+        [StringLength(20)]
+        public string EstadoEnvio { get; set; } = "PENDIENTE";  // "PENDIENTE", "EMPACANDO", "EN_TRANSITO", "ENTREGADO", "CANCELADO"
 
         [Required]
         [ForeignKey("Pedido")]

@@ -9,15 +9,15 @@ namespace Cyra.Repositories.Interfaces
         Task<IEnumerable<Pedido>> GetAllAsync();
         Task<IEnumerable<Pedido>> GetByClienteAsync(long idCliente);
         Task<IEnumerable<Pedido>> GetByVendedorAsync(long idVendedor);
-        Task<IEnumerable<Pedido>> GetByEstadoAsync(EstadoPedidoType estado);
+        Task<IEnumerable<Pedido>> GetByEstadoAsync(string estado);  // Cambiar a string
         Task<IEnumerable<Pedido>> GetByFechaAsync(DateTime fechaInicio, DateTime fechaFin);
         Task<IEnumerable<Pedido>> GetWithDetailsAsync();
         Task<Pedido> AddAsync(Pedido pedido);
         Task<Pedido> UpdateAsync(Pedido pedido);
         Task<bool> DeleteAsync(long id);
-        Task<bool> UpdateEstadoAsync(long idPedido, EstadoPedidoType nuevoEstado);
+        Task<bool> UpdateEstadoAsync(long idPedido, string estado);  // Cambiar a string
         Task<decimal> GetTotalVentasByDateAsync(DateTime fechaInicio, DateTime fechaFin);
-        Task<int> GetCountByEstadoAsync(EstadoPedidoType estado);
+        Task<int> GetCountByEstadoAsync(string estado);  // Cambiar a string
         Task<int> GetCountByClienteAsync(long idCliente);
     }
 

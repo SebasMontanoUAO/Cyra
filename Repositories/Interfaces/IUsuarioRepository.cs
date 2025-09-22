@@ -8,7 +8,7 @@ namespace Cyra.Repositories
         Task<Usuario?> GetByEmailAsync(string email);
         Task<IEnumerable<Usuario>> GetAllAsync();
         Task<IEnumerable<Usuario>> GetByTipoAsync(string tipoUsuario);
-        Task<IEnumerable<Usuario>> GetByEstadoAsync(EstadoUsuarioType estado);
+        Task<IEnumerable<Usuario>> GetByEstadoAsync(string estado);  // Cambiar a string
         Task<Usuario> AddAsync(Usuario usuario);
         Task<Usuario> UpdateAsync(Usuario usuario);
         Task<bool> DeleteAsync(long id);

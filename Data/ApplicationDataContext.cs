@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Cyra.Models; // Asegúrate de que tus modelos estén en este namespace
+using Cyra.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cyra.Data
@@ -28,15 +28,19 @@ namespace Cyra.Data
             base.OnModelCreating(modelBuilder);
 
             // Configurar enums para PostgreSQL
-            modelBuilder.HasPostgresEnum<EstadoUsuarioType>();
-            modelBuilder.HasPostgresEnum<EstadoPublicacionType>();
-            modelBuilder.HasPostgresEnum<EstadoCarritoType>();
-            modelBuilder.HasPostgresEnum<EstadoPedidoType>();
-            modelBuilder.HasPostgresEnum<EstadoPagoType>();
-            modelBuilder.HasPostgresEnum<EstadoEnvioType>();
+            // ❌ COMENTAR TEMPORALMENTE TODOS los ENUMs
+            // modelBuilder.HasPostgresEnum<EstadoUsuarioType>();
+            // modelBuilder.HasPostgresEnum<EstadoPublicacionType>();
+            // modelBuilder.HasPostgresEnum<EstadoCarritoType>();
+            // modelBuilder.HasPostgresEnum<EstadoPedidoType>();
+            // modelBuilder.HasPostgresEnum<EstadoPagoType>();
+            // modelBuilder.HasPostgresEnum<EstadoEnvioType>();
 
             // Configurar esquema por defecto
             modelBuilder.HasDefaultSchema("New_schema");
+
+            // ✅ CONFIGURAR CLAVES COMPUESTAS PRIMERO
+            ConfigureCompositeKeys(modelBuilder);
 
             // Configurar todas las relaciones
             ConfigureUsuarioRelations(modelBuilder);
@@ -50,6 +54,22 @@ namespace Cyra.Data
 
             // Configurar constraints de CHECK
             ConfigureCheckConstraints(modelBuilder);
+        }
+
+        // ✅ NUEVO MÉTODO PARA CONFIGURAR CLAVES COMPUESTAS
+        private void ConfigureCompositeKeys(ModelBuilder modelBuilder)
+        {
+            // DetalleCarrito - Clave primaria compuesta (IdCarrito, IdProducto)
+            modelBuilder.Entity<DetalleCarrito>()
+                .HasKey(dc => new { dc.IdCarrito, dc.IdProducto });
+
+            // DetallePedido - Clave primaria compuesta (IdPedido, IdProducto)
+            modelBuilder.Entity<DetallePedido>()
+                .HasKey(dp => new { dp.IdPedido, dp.IdProducto });
+
+            // ProductoCategoria - Clave primaria compuesta (IdProducto, IdCategoria)
+            modelBuilder.Entity<ProductoCategoria>()
+                .HasKey(pc => new { pc.IdProducto, pc.IdCategoria });
         }
 
         private void ConfigureUsuarioRelations(ModelBuilder modelBuilder)
@@ -95,6 +115,7 @@ namespace Cyra.Data
                 .HasForeignKey(c => c.IdCliente)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // ✅ YA NO configurar HasKey aquí - se hace en ConfigureCompositeKeys
             // DetalleCarrito -> Carrito
             modelBuilder.Entity<DetalleCarrito>()
                 .HasOne(dc => dc.Carrito)
@@ -119,10 +140,8 @@ namespace Cyra.Data
                 .HasForeignKey(p => p.IdCliente)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // DetallePedido -> Pedido (Composite Key)
-            modelBuilder.Entity<DetallePedido>()
-                .HasKey(dp => new { dp.IdPedido, dp.IdProducto });
-
+            // ✅ YA NO configurar HasKey aquí - se hace en ConfigureCompositeKeys
+            // DetallePedido -> Pedido
             modelBuilder.Entity<DetallePedido>()
                 .HasOne(dp => dp.Pedido)
                 .WithMany(p => p.Detalles)
@@ -153,16 +172,15 @@ namespace Cyra.Data
 
         private void ConfigureCategoriaRelations(ModelBuilder modelBuilder)
         {
-            // ProductoCategoria (Many-to-Many)
-            modelBuilder.Entity<ProductoCategoria>()
-                .HasKey(pc => new { pc.IdProducto, pc.IdCategoria });
-
+            // ✅ YA NO configurar HasKey aquí - se hace en ConfigureCompositeKeys
+            // ProductoCategoria -> Producto
             modelBuilder.Entity<ProductoCategoria>()
                 .HasOne(pc => pc.Producto)
                 .WithMany(p => p.Categorias)
                 .HasForeignKey(pc => pc.IdProducto)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // ProductoCategoria -> Categoria
             modelBuilder.Entity<ProductoCategoria>()
                 .HasOne(pc => pc.Categoria)
                 .WithMany(c => c.Productos)
@@ -231,38 +249,81 @@ namespace Cyra.Data
 
         private void ConfigureCheckConstraints(ModelBuilder modelBuilder)
         {
-            // Constraints para Usuario
-            modelBuilder.Entity<Usuario>()
-                .HasCheckConstraint("CK_Usuario_TipoUsuario", "tipo_usuario IN ('CLIENTE', 'VENDEDOR')");
+            ConfigureUsuarioConstraints(modelBuilder);
+            ConfigureProductoConstraints(modelBuilder);
+            ConfigureCarritoConstraints(modelBuilder);
+            ConfigurePedidoConstraints(modelBuilder);
+            ConfigurePagoConstraints(modelBuilder);
+            ConfigureEnvioConstraints(modelBuilder);
+            ConfigureDetalleConstraints(modelBuilder);
+        }
 
-            // Constraints para Producto
-            modelBuilder.Entity<Producto>()
-                .HasCheckConstraint("CK_Producto_Precio", "precio >= 0");
+        private void ConfigureUsuarioConstraints(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.ToTable(t => t.HasCheckConstraint("CK_Usuario_TipoUsuario", "\"TipoUsuario\" IN ('CLIENTE', 'VENDEDOR')"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_Usuario_Estado", "\"Estado\" IN ('ACTIVO', 'INACTIVO', 'SUSPENDIDO')"));
+            });
+        }
 
-            modelBuilder.Entity<Producto>()
-                .HasCheckConstraint("CK_Producto_Stock", "stock >= 0");
+        private void ConfigureProductoConstraints(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Producto>(entity =>
+            {
+                entity.ToTable(t => t.HasCheckConstraint("CK_Producto_Precio", "\"Precio\" >= 0"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_Producto_Stock", "\"Stock\" >= 0"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_Producto_EstadoPublicacion", "\"EstadoPublicacion\" IN ('BORRADOR', 'ACTIVO', 'PAUSADO', 'AGOTADO', 'ELIMINADO')"));
+            });
+        }
 
-            // Constraints para DetalleCarrito
-            modelBuilder.Entity<DetalleCarrito>()
-                .HasCheckConstraint("CK_DetalleCarrito_Cantidad", "cantidad > 0");
+        private void ConfigureCarritoConstraints(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Carrito>(entity =>
+            {
+                entity.ToTable(t => t.HasCheckConstraint("CK_Carrito_EstadoCarrito", "\"EstadoCarrito\" IN ('ACTIVO', 'ABANDONADO', 'FINALIZADO')"));
+            });
+        }
 
-            modelBuilder.Entity<DetalleCarrito>()
-                .HasCheckConstraint("CK_DetalleCarrito_Precio", "precio_unitario >= 0");
+        private void ConfigurePedidoConstraints(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Pedido>(entity =>
+            {
+                entity.ToTable(t => t.HasCheckConstraint("CK_Pedido_Total", "\"Total\" >= 0"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_Pedido_EstadoPedido", "\"EstadoPedido\" IN ('PENDIENTE', 'CONFIRMADO', 'PREPARACION', 'ENVIADO', 'ENTREGADO', 'CANCELADO')"));
+            });
+        }
 
-            // Constraints para DetallePedido
-            modelBuilder.Entity<DetallePedido>()
-                .HasCheckConstraint("CK_DetallePedido_Cantidad", "cantidad > 0");
+        private void ConfigurePagoConstraints(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Pago>(entity =>
+            {
+                entity.ToTable(t => t.HasCheckConstraint("CK_Pago_Monto", "\"Monto\" >= 0"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_Pago_EstadoPago", "\"EstadoPago\" IN ('PENDIENTE', 'PROCESANDO', 'COMPLETADO', 'RECHAZADO', 'REEMBOLSADO')"));
+            });
+        }
 
-            modelBuilder.Entity<DetallePedido>()
-                .HasCheckConstraint("CK_DetallePedido_Precio", "precio_unitario >= 0");
+        private void ConfigureEnvioConstraints(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Envio>(entity =>
+            {
+                entity.ToTable(t => t.HasCheckConstraint("CK_Envio_EstadoEnvio", "\"EstadoEnvio\" IN ('PENDIENTE', 'EMPACANDO', 'EN_TRANSITO', 'ENTREGADO', 'CANCELADO')"));
+            });
+        }
 
-            // Constraints para Pedido
-            modelBuilder.Entity<Pedido>()
-                .HasCheckConstraint("CK_Pedido_Total", "total >= 0");
+        private void ConfigureDetalleConstraints(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<DetalleCarrito>(entity =>
+            {
+                entity.ToTable(t => t.HasCheckConstraint("CK_DetalleCarrito_Cantidad", "\"Cantidad\" > 0"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_DetalleCarrito_Precio", "\"PrecioUnitario\" >= 0"));
+            });
 
-            // Constraints para Pago
-            modelBuilder.Entity<Pago>()
-                .HasCheckConstraint("CK_Pago_Monto", "monto >= 0");
+            modelBuilder.Entity<DetallePedido>(entity =>
+            {
+                entity.ToTable(t => t.HasCheckConstraint("CK_DetallePedido_Cantidad", "\"Cantidad\" > 0"));
+                entity.ToTable(t => t.HasCheckConstraint("CK_DetallePedido_Precio", "\"PrecioUnitario\" >= 0"));
+            });
         }
     }
 }

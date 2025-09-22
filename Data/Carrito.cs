@@ -3,8 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cyra.Data
 {
-    public enum EstadoCarritoType { ACTIVO, ABANDONADO, FINALIZADO }
-
     [Table("Carrito", Schema = "New_schema")]
     public class Carrito
     {
@@ -19,8 +17,8 @@ namespace Cyra.Data
         public long IdCliente { get; set; }
 
         [Required]
-        [Column(TypeName = "estado_carrito_type")]
-        public EstadoCarritoType EstadoCarrito { get; set; } = EstadoCarritoType.ACTIVO;
+        [StringLength(20)]
+        public string EstadoCarrito { get; set; } = "ACTIVO";  // "ACTIVO", "ABANDONADO", "FINALIZADO"
 
         // Navigation properties
         public virtual Cliente Cliente { get; set; }

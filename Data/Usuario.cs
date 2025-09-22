@@ -3,8 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cyra.Data
 {
-    public enum EstadoUsuarioType { ACTIVO, INACTIVO, SUSPENDIDO }
-
     [Table("Usuario", Schema = "New_schema")]
     public class Usuario
     {
@@ -34,8 +32,8 @@ namespace Cyra.Data
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
         [Required]
-        [Column(TypeName = "estado_usuario_type")]
-        public EstadoUsuarioType Estado { get; set; } = EstadoUsuarioType.ACTIVO;
+        [StringLength(20)]
+        public string Estado { get; set; } = "ACTIVO";  // "ACTIVO", "INACTIVO", "SUSPENDIDO"
 
         [Required]
         [StringLength(20)]

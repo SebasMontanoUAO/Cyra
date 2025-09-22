@@ -6,13 +6,10 @@ namespace Cyra.Data
     [Table("Detalle_carrito", Schema = "New_schema")]
     public class DetalleCarrito
     {
-        [Key]
-        [Column(Order = 1)]
+        // ❌ NO usar [Key] aquí - se configura en DbContext
         [ForeignKey("Carrito")]
         public long IdCarrito { get; set; }
 
-        [Key]
-        [Column(Order = 2)]
         [ForeignKey("Producto")]
         public long IdProducto { get; set; }
 
@@ -27,6 +24,7 @@ namespace Cyra.Data
         public virtual Carrito Carrito { get; set; }
         public virtual Producto Producto { get; set; }
 
+        // Propiedad calculada (no se mapea a la BD)
         [NotMapped]
         public decimal Subtotal => Cantidad * PrecioUnitario;
     }

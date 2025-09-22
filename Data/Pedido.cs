@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Cyra.Data
 {
-    public enum EstadoPedidoType { PENDIENTE, CONFIRMADO, PREPARACION, ENVIADO, ENTREGADO, CANCELADO }
 
     [Table("Pedido", Schema = "New_schema")]
     public class Pedido
@@ -20,8 +19,8 @@ namespace Cyra.Data
         public decimal Total { get; set; }
 
         [Required]
-        [Column(TypeName = "estado_pedido_type")]
-        public EstadoPedidoType EstadoPedido { get; set; } = EstadoPedidoType.PENDIENTE;
+        [StringLength(20)]
+        public string EstadoPedido { get; set; } = "PENDIENTE";  // "PENDIENTE", "CONFIRMADO", "PREPARACION", "ENVIADO", "ENTREGADO", "CANCELADO"
 
         [Required]
         [ForeignKey("Cliente")]

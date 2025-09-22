@@ -38,7 +38,7 @@ namespace Cyra.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Usuario>> GetByEstadoAsync(EstadoUsuarioType estado)
+        public async Task<IEnumerable<Usuario>> GetByEstadoAsync(String estado)
         {
             return await _context.Usuarios
                 .Where(u => u.Estado == estado)

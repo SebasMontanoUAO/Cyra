@@ -3,8 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cyra.Data
 {
-    public enum EstadoPublicacionType { BORRADOR, ACTIVO, PAUSADO, AGOTADO, ELIMINADO }
-
     [Table("Producto", Schema = "New_schema")]
     public class Producto
     {
@@ -26,8 +24,8 @@ namespace Cyra.Data
         public int Stock { get; set; } = 0;
 
         [Required]
-        [Column(TypeName = "estado_publicacion_type")]
-        public EstadoPublicacionType EstadoPublicacion { get; set; } = EstadoPublicacionType.BORRADOR;
+        [StringLength(20)]
+        public string EstadoPublicacion { get; set; } = "BORRADOR";  // "BORRADOR", "ACTIVO", "PAUSADO", "AGOTADO", "ELIMINADO"
 
         public DateTime? FechaPublicacion { get; set; }
 

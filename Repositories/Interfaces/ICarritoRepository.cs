@@ -8,12 +8,12 @@ namespace Cyra.Repositories.Interfaces
         Task<Carrito?> GetByIdWithDetailsAsync(long id);
         Task<Carrito?> GetActiveByClienteAsync(long idCliente);
         Task<IEnumerable<Carrito>> GetByClienteAsync(long idCliente);
-        Task<IEnumerable<Carrito>> GetByEstadoAsync(EstadoCarritoType estado);
+        Task<IEnumerable<Carrito>> GetByEstadoAsync(string estado);  // Cambiar a string
         Task<IEnumerable<Carrito>> GetAbandonadosAsync(DateTime desdeFecha);
         Task<Carrito> AddAsync(Carrito carrito);
         Task<Carrito> UpdateAsync(Carrito carrito);
         Task<bool> DeleteAsync(long id);
-        Task<bool> UpdateEstadoAsync(long idCarrito, EstadoCarritoType nuevoEstado);
+        Task<bool> UpdateEstadoAsync(long idCarrito, string estado);  // Cambiar a string
         Task<bool> CleanOldAbandonedCartsAsync(int daysOld);
     }
 }

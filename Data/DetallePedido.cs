@@ -6,13 +6,10 @@ namespace Cyra.Data
     [Table("Detalle_pedido", Schema = "New_schema")]
     public class DetallePedido
     {
-        [Key]
-        [Column(Order = 1)]
+        // ❌ NO usar [Key] aquí - se configura en DbContext
         [ForeignKey("Pedido")]
         public long IdPedido { get; set; }
 
-        [Key]
-        [Column(Order = 2)]
         [ForeignKey("Producto")]
         public long IdProducto { get; set; }
 
