@@ -122,5 +122,14 @@ namespace Cyra.Controllers
 
             return Ok(response);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Eliminar(int id)
+        {
+            var eliminado = await _usuarioRepository.DeleteAsync(id);
+            if (!eliminado) return NotFound();
+
+            return NoContent();
+        }
     }
 }
