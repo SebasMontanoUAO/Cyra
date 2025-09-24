@@ -1,5 +1,6 @@
 ﻿using Cyra.Data;
 using Cyra.Repositories.Interfaces;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cyra.Repositories
@@ -28,7 +29,7 @@ namespace Cyra.Repositories
         public async Task<IEnumerable<Usuario>> GetByTipoAsync(string tipoUsuario)
         {
             var tipo = tipoUsuario.ToUpperInvariant();
-            if (tipo != "CLIENTE" && tipo != "VENDEDOR")
+            if (tipo != "CLIENTE" && tipo != "VENDEDOR" && tipo != "")
             {
                 throw new ArgumentException("TipoUsuario inválido. Use CLIENTE o VENDEDOR.");
             }
@@ -90,7 +91,7 @@ namespace Cyra.Repositories
         public async Task<int> GetCountByTipoAsync(string tipoUsuario)
         {
             var tipo = tipoUsuario.ToUpperInvariant();
-            if (tipo != "CLIENTE" && tipo != "VENDEDOR")
+            if (tipo != "CLIENTE" && tipo != "VENDEDOR" && tipo != "")
             {
                 throw new ArgumentException("TipoUsuario inválido. Use CLIENTE o VENDEDOR.");
             }

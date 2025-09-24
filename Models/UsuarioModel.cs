@@ -35,7 +35,7 @@ namespace Cyra.Models
         public string? Direccion { get; set; }
 
         [Required]
-        [RegularExpression("CLIENTE|VENDEDOR", ErrorMessage = "El tipo de usuario debe ser CLIENTE o VENDEDOR.")]
+        [RegularExpression("CLIENTE|VENDEDOR|", ErrorMessage = "El tipo de usuario debe ser CLIENTE o VENDEDOR.")]
         public string TipoUsuario { get; set; }
     }
 
