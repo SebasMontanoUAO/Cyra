@@ -34,26 +34,34 @@ namespace Cyra.Controllers
                 Estado = u.Estado.ToString(),
                 TipoUsuario = u.TipoUsuario
             });
-            return Ok(response);
+
+            return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Usuarios obtenidos correctamente!", response));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var usuario = await _usuarioRepository.GetByIdAsync(id);
-            if (usuario == null) return NotFound();
-
-            return Ok(new UsuarioResponseModel
+            try
             {
-                IdUsuario = usuario.IdUsuario,
-                Nombre = usuario.Nombre,
-                Email = usuario.Email,
-                Telefono = usuario.Telefono,
-                Direccion = usuario.Direccion,
-                FechaCreacion = usuario.FechaCreacion,
-                Estado = usuario.Estado.ToString(),
-                TipoUsuario = usuario.TipoUsuario
-            });
+                var usuario = await _usuarioRepository.GetByIdAsync(id);
+                if (usuario == null) return NotFound(ApiResponseHelper.GetResponse(ResponseType.NotFound, $"No se pudo encontrar el usuario ID: {id}"));
+
+                return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Usuario encontrado correctamente!", new UsuarioResponseModel
+                {
+                    IdUsuario = usuario.IdUsuario,
+                    Nombre = usuario.Nombre,
+                    Email = usuario.Email,
+                    Telefono = usuario.Telefono,
+                    Direccion = usuario.Direccion,
+                    FechaCreacion = usuario.FechaCreacion,
+                    Estado = usuario.Estado.ToString(),
+                    TipoUsuario = usuario.TipoUsuario
+                }));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+            }
         }
 
         // POST api/usuarios/register
@@ -62,7 +70,7 @@ namespace Cyra.Controllers
         {
             var usuarioExistente = await _usuarioRepository.GetByEmailAsync(usuarioRegistro.Email);
             if (usuarioExistente != null)
-                return BadRequest("El email ya está registrado.");
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "El email ya está registrado."));
 
             var usuario = new Usuario
             {
@@ -73,19 +81,30 @@ namespace Cyra.Controllers
                 TipoUsuario = usuarioRegistro.TipoUsuario
             };
 
-            var nuevoUsuario = await _usuarioRepository.AddAsync(usuario);
-
-            return CreatedAtAction(nameof(GetById), new { id = nuevoUsuario.IdUsuario }, new UsuarioResponseModel
+            try
             {
-                IdUsuario = nuevoUsuario.IdUsuario,
-                Nombre = nuevoUsuario.Nombre,
-                Email = nuevoUsuario.Email,
-                Telefono = nuevoUsuario.Telefono,
-                Direccion = nuevoUsuario.Direccion,
-                FechaCreacion = nuevoUsuario.FechaCreacion,
-                Estado = nuevoUsuario.Estado.ToString(),
-                TipoUsuario = nuevoUsuario.TipoUsuario
-            });
+                var nuevoUsuario = await _usuarioRepository.AddAsync(usuario);
+
+                var responseModel = new UsuarioResponseModel
+                {
+                    IdUsuario = nuevoUsuario.IdUsuario,
+                    Nombre = nuevoUsuario.Nombre,
+                    Email = nuevoUsuario.Email,
+                    Telefono = nuevoUsuario.Telefono,
+                    Direccion = nuevoUsuario.Direccion,
+                    FechaCreacion = nuevoUsuario.FechaCreacion,
+                    Estado = nuevoUsuario.Estado.ToString(),
+                    TipoUsuario = nuevoUsuario.TipoUsuario
+                };
+
+                var apiResponse = ApiResponseHelper.GetResponse(ResponseType.Success, "Usuario creado exitosamente", responseModel);
+
+                return CreatedAtAction(nameof(GetById), new { id = nuevoUsuario.IdUsuario }, apiResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // PUT: api/usuario/5
@@ -93,43 +112,56 @@ namespace Cyra.Controllers
         public async Task<IActionResult> Actualizar(int id, [FromBody] UsuarioUpdateModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Model State is not valid", ModelState));
 
-            // Buscar el usuario existente
             var usuario = await _usuarioRepository.GetByIdAsync(id);
             if (usuario == null)
-                return NotFound(new { message = $"No se encontró el usuario con Id {id}" });
+                return NotFound(ApiResponseHelper.GetResponse(ResponseType.NotFound, $"No se encontró el usuario con Id {id}"));
 
-            // Mapear datos desde el modelo
             usuario.Nombre = model.Nombre;
             usuario.Telefono = model.Telefono;
             usuario.Direccion = model.Direccion;
             usuario.Estado = model.Estado;
 
-            // Guardar cambios
-            var actualizado = await _usuarioRepository.UpdateAsync(usuario);
-
-            // Respuesta
-            var response = new UsuarioResponseModel
+            try
             {
-                IdUsuario = actualizado.IdUsuario,
-                Nombre = actualizado.Nombre,
-                Email = actualizado.Email,
-                Telefono = actualizado.Telefono,
-                Direccion = actualizado.Direccion,
-                Estado = actualizado.Estado.ToString()
-            };
+                var actualizado = await _usuarioRepository.UpdateAsync(usuario);
 
-            return Ok(response);
+                var response = new UsuarioResponseModel
+                {
+                    IdUsuario = actualizado.IdUsuario,
+                    Nombre = actualizado.Nombre,
+                    Email = actualizado.Email,
+                    Telefono = actualizado.Telefono,
+                    Direccion = actualizado.Direccion,
+                    Estado = actualizado.Estado.ToString()
+                };
+
+                return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Usuario actualizado correctamente!", response));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+            }
+            
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Eliminar(int id)
         {
-            var eliminado = await _usuarioRepository.DeleteAsync(id);
-            if (!eliminado) return NotFound();
-
-            return NoContent();
+            try
+            {
+                var eliminado = await _usuarioRepository.DeleteAsync(id);
+                if (!eliminado)
+                {
+                    return NotFound(ApiResponseHelper.GetResponse(ResponseType.NotFound, "No se ha podido encontrar el usuario que está intentando eliminar."));
+                }
+                return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, $"Se eliminó el usuario con ID {id}"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+            }
         }
     }
 }
