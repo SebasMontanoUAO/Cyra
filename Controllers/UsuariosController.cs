@@ -76,6 +76,7 @@ namespace Cyra.Controllers
             {
                 Nombre = usuarioRegistro.Nombre,
                 Email = usuarioRegistro.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(usuarioRegistro.Password),
                 Telefono = usuarioRegistro.Telefono,
                 Direccion = usuarioRegistro.Direccion,
                 TipoUsuario = usuarioRegistro.TipoUsuario
