@@ -12,6 +12,7 @@ namespace Cyra.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Vendedor> Vendedores { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Administrador> Administradores { get; set; }
         public DbSet<Producto> Productos { get; set; }
         public DbSet<ImagenProducto> ImagenesProducto { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
@@ -86,6 +87,13 @@ namespace Cyra.Data
                 .HasOne(c => c.Usuario)
                 .WithOne(u => u.Cliente)
                 .HasForeignKey<Cliente>(c => c.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Usuario -> Administrador (1:1)
+            modelBuilder.Entity<Administrador>()
+                .HasOne(a => a.Usuario)
+                .WithOne(u => u.Administrador)
+                .HasForeignKey<Administrador>(a => a.IdUsuario)
                 .OnDelete(DeleteBehavior.Cascade);
         }
 
@@ -263,8 +271,15 @@ namespace Cyra.Data
         {
             modelBuilder.Entity<Usuario>(entity =>
             {
-                entity.ToTable(t => t.HasCheckConstraint("CK_Usuario_TipoUsuario", "\"TipoUsuario\" IN ('CLIENTE', 'VENDEDOR')"));
-                entity.ToTable(t => t.HasCheckConstraint("CK_Usuario_Estado", "\"Estado\" IN ('ACTIVO', 'INACTIVO', 'SUSPENDIDO')"));
+                entity.ToTable(t => t.HasCheckConstraint(
+                    "CK_Usuario_TipoUsuario",
+                    "\"TipoUsuario\" IN ('CLIENTE', 'VENDEDOR', 'ADMINISTRADOR')"
+                ));
+
+                entity.ToTable(t => t.HasCheckConstraint(
+                    "CK_Usuario_Estado",
+                    "\"Estado\" IN ('ACTIVO', 'INACTIVO', 'SUSPENDIDO')"
+                ));
             });
         }
 

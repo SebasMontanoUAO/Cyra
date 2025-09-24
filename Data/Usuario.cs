@@ -42,5 +42,7 @@ namespace Cyra.Data
         // Navigation properties
         public virtual Vendedor Vendedor { get; set; }
         public virtual Cliente Cliente { get; set; }
+
+        public virtual Administrador Administrador { get; set; }
     }
 }
