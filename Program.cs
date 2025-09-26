@@ -4,7 +4,6 @@ using Cyra.Services;
 using Cyra.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
