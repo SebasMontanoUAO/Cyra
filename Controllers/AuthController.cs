@@ -29,7 +29,12 @@ namespace Cyra.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message // si quieres mostrar solo el mensaje
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
             }
         }
 
@@ -39,11 +44,16 @@ namespace Cyra.Controllers
             try
             {
                 var response = await _authService.LoginAsync(request);
-                return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Usuario registrado de manera correcta", response));
+                return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Login exitoso", response));
             }
             catch (Exception ex)
             {
-                return Unauthorized(ApiResponseHelper.ExceptionResponse(ex));
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el login",
+                    Details = ex.Message
+                };
+                return Unauthorized(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error en el login", errorResponse));
             }
         }
     }
