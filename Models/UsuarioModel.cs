@@ -78,6 +78,12 @@ namespace Cyra.Models
         public string TipoUsuario { get; set; }
     }
 
+    public class ErrorResponse
+    {
+        public string Message { get; set; }
+        public string? Details { get; set; }
+    }
+
     public class UsuarioModel
     {
 
