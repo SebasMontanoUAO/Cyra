@@ -16,28 +16,6 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-<<<<<<< Updated upstream
-=======
-builder.Services.AddScoped<IAuthService, AuthService>();
-
-// 🔹 Configuración de autenticación
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
-    });
-
-builder.Services.AddAuthorization();
->>>>>>> Stashed changes
 
 // ✅ Aquí agregamos la política de CORS
 builder.Services.AddCors(options =>
@@ -61,14 +39,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-<<<<<<< Updated upstream
-=======
-
-// ✅ Importante: activar CORS antes de auth y controllers
-app.UseCors("AllowFrontend");
-
-app.UseAuthentication();
->>>>>>> Stashed changes
 app.UseAuthorization();
 
 app.MapControllers();
