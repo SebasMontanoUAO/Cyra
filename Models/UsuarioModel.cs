@@ -2,17 +2,6 @@
 
 namespace Cyra.Models
 {
-    public class UsuarioResponseModel
-    {
-        public long IdUsuario { get; set; }
-        public string Nombre { get; set; }
-        public string Email { get; set; }
-        public string Telefono { get; set; }
-        public string Direccion { get; set; }
-        public DateTime FechaCreacion { get; set; }
-        public string Estado { get; set; }
-        public string TipoUsuario { get; set; }
-    }
     public class UsuarioRegisterModel
     {
         [Required]
@@ -35,7 +24,7 @@ namespace Cyra.Models
         public string? Direccion { get; set; }
 
         [Required]
-        [RegularExpression("CLIENTE|VENDEDOR", ErrorMessage = "El tipo de usuario debe ser CLIENTE o VENDEDOR.")]
+        [RegularExpression("CLIENTE|VENDEDOR|ADMIN", ErrorMessage = "El tipo de usuario debe ser CLIENTE o VENDEDOR.")]
         public string TipoUsuario { get; set; }
     }
 
@@ -56,10 +45,45 @@ namespace Cyra.Models
             ErrorMessage = "El estado debe ser ACTIVO, INACTIVO o SUSPENDIDO.")]
         public string Estado { get; set; }
     }
+
     public class UsuarioLoginModel
     {
+        [Required]
+        [StringLength(150)]
+        [EmailAddress]
+        public string Email { get; set; }
 
+        [Required]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres.")]
+        public string Password { get; set; }
     }
+
+    public class UsuarioResponseModel
+    {
+        public long IdUsuario { get; set; }
+        public string Nombre { get; set; }
+        public string Email { get; set; }
+        public string Telefono { get; set; }
+        public string Direccion { get; set; }
+        public DateTime FechaCreacion { get; set; }
+        public string Estado { get; set; }
+        public string TipoUsuario { get; set; }
+    }
+
+    public class AuthResponseModel
+    {
+        public string Token { get; set; }
+        public string Email { get; set; }
+        public string Nombre { get; set; }
+        public string TipoUsuario { get; set; }
+    }
+
+    public class ErrorResponse
+    {
+        public string Message { get; set; }
+        public string? Details { get; set; }
+    }
+
     public class UsuarioModel
     {
 
