@@ -1,9 +1,10 @@
 ﻿using Cyra.Data;
 using Cyra.Repositories;
+using Cyra.Repositories.Interfaces;
 using Cyra.Services;
 using Cyra.Services.Interfaces;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,7 @@ builder.Services.AddSwaggerGen();
 
 // Repositorios y servicios
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // 🔑 Configuración de JWT
