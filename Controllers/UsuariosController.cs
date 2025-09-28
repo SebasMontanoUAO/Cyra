@@ -18,29 +18,42 @@ namespace Cyra.Controllers
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IAuthService _authService;
 
-        public UsuariosController(IUsuarioRepository usuarioRepository)
+        public UsuariosController(IUsuarioRepository usuarioRepository, IAuthService authService)
         {
             _usuarioRepository = usuarioRepository;
+            _authService = authService;
         }
 
         [Authorize(Roles = "ADMIN")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var usuarios = await _usuarioRepository.GetAllAsync();
-            var response = usuarios.Select(u => new UsuarioResponseModel
+            try
             {
-                IdUsuario = u.IdUsuario,
-                Nombre = u.Nombre,
-                Email = u.Email,
-                Telefono = u.Telefono,
-                Direccion = u.Direccion,
-                FechaCreacion = u.FechaCreacion,
-                Estado = u.Estado.ToString(),
-                TipoUsuario = u.TipoUsuario
-            });
+                var usuarios = await _usuarioRepository.GetAllAsync();
+                var response = usuarios.Select(u => new UsuarioResponseModel
+                {
+                    IdUsuario = u.IdUsuario,
+                    Nombre = u.Nombre,
+                    Email = u.Email,
+                    Telefono = u.Telefono,
+                    Direccion = u.Direccion,
+                    FechaCreacion = u.FechaCreacion,
+                    Estado = u.Estado.ToString(),
+                    TipoUsuario = u.TipoUsuario
+                });
 
-            return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Usuarios obtenidos correctamente!", response));
+                return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Usuarios obtenidos correctamente!", response));
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
+            }
         }
 
         [HttpGet("{id}")]
@@ -65,7 +78,12 @@ namespace Cyra.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
             }
         }
 
@@ -95,7 +113,7 @@ namespace Cyra.Controllers
 
         // PUT: api/usuario/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Actualizar(int id, [FromBody] UsuarioUpdateModel model)
+        public async Task<IActionResult> Actualizar(long id, [FromBody] UsuarioUpdateModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Model State is not valid", ModelState));
@@ -127,7 +145,12 @@ namespace Cyra.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
             }
             
         }
@@ -147,7 +170,12 @@ namespace Cyra.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
             }
         }
     }
