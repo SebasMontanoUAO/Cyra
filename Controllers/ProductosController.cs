@@ -109,7 +109,7 @@ namespace Cyra.Controllers
                     Message = "Ocurrió un error en el registro",
                     Details = ex.Message
                 };
-                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el producto", errorResponse));
             }
         }
 
