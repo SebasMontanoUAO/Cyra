@@ -84,7 +84,7 @@ namespace Cyra.Controllers
             }
         }
 
-        [Authorize(Roles = "VENDEDOR")]
+        //[Authorize(Roles = "VENDEDOR")]
         [HttpPost]
         public async Task<IActionResult> Crear([FromBody] ProductoCreateModel productoCreado)
         {
