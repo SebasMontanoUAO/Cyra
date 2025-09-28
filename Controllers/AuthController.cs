@@ -1,5 +1,6 @@
 ﻿using Cyra.Data;
 using Cyra.Models;
+using Cyra.Repositories;
 using Cyra.Services.Interfaces;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ namespace Cyra.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly IUsuarioRepository _usuarioRepository;
         private readonly IAuthService _authService;
 
         public AuthController(IAuthService authService)
@@ -22,6 +24,9 @@ namespace Cyra.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UsuarioRegisterModel request)
         {
+            var usuarioExistente = await _usuarioRepository.GetByEmailAsync(request.Email);
+            if (usuarioExistente != null) return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Email ya registrado.", request));
+
             try
             {
                 var response = await _authService.RegisterAsync(request);
@@ -32,7 +37,7 @@ namespace Cyra.Controllers
                 var errorResponse = new ErrorResponse
                 {
                     Message = "Ocurrió un error en el registro",
-                    Details = ex.Message // si quieres mostrar solo el mensaje
+                    Details = ex.Message
                 };
                 return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
             }

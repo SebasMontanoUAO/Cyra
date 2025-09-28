@@ -37,7 +37,12 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("ADMIN"));
+    options.AddPolicy("VendedorOnly", policy => policy.RequireRole("VENDEDOR"));
+    options.AddPolicy("ClienteOnly", policy => policy.RequireRole("CLIENTE"));
+});
 
 var app = builder.Build();
 
