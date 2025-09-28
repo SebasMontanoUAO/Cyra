@@ -37,7 +37,7 @@ namespace Cyra.Data
 
         [Required]
         [StringLength(20)]
-        public string TipoUsuario { get; set; }  // "CLIENTE" o "VENDEDOR"
+        public string TipoUsuario { get; set; }  // "CLIENTE" o "VENDEDOR" o "ADMIN"
 
         // Navigation properties
         public virtual Vendedor Vendedor { get; set; }

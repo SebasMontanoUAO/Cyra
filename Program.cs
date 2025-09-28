@@ -4,7 +4,6 @@ using Cyra.Services;
 using Cyra.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,7 +42,12 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("ADMIN"));
+    options.AddPolicy("VendedorOnly", policy => policy.RequireRole("VENDEDOR"));
+    options.AddPolicy("ClienteOnly", policy => policy.RequireRole("CLIENTE"));
+});
 
 // ✅ Configurar CORS para React/Vite
 builder.Services.AddCors(options =>

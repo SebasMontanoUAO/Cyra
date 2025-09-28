@@ -2,9 +2,12 @@
 using Cyra.Models;
 using Cyra.Repositories;
 using Cyra.Repositories.Interfaces;
+using Cyra.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Cyra.Controllers
 {
@@ -13,29 +16,44 @@ namespace Cyra.Controllers
     public class UsuariosController : ControllerBase
     {
         private readonly IUsuarioRepository _usuarioRepository;
+        private readonly IAuthService _authService;
 
-        public UsuariosController(IUsuarioRepository usuarioRepository)
+        public UsuariosController(IUsuarioRepository usuarioRepository, IAuthService authService)
         {
             _usuarioRepository = usuarioRepository;
+            _authService = authService;
         }
 
+        [Authorize(Roles = "ADMIN")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var usuarios = await _usuarioRepository.GetAllAsync();
-            var response = usuarios.Select(u => new UsuarioResponseModel
+            try
             {
-                IdUsuario = u.IdUsuario,
-                Nombre = u.Nombre,
-                Email = u.Email,
-                Telefono = u.Telefono,
-                Direccion = u.Direccion,
-                FechaCreacion = u.FechaCreacion,
-                Estado = u.Estado.ToString(),
-                TipoUsuario = u.TipoUsuario
-            });
+                var usuarios = await _usuarioRepository.GetAllAsync();
+                var response = usuarios.Select(u => new UsuarioResponseModel
+                {
+                    IdUsuario = u.IdUsuario,
+                    Nombre = u.Nombre,
+                    Email = u.Email,
+                    Telefono = u.Telefono,
+                    Direccion = u.Direccion,
+                    FechaCreacion = u.FechaCreacion,
+                    Estado = u.Estado.ToString(),
+                    TipoUsuario = u.TipoUsuario
+                });
 
-            return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Usuarios obtenidos correctamente!", response));
+                return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Usuarios obtenidos correctamente!", response));
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
+            }
         }
 
         [HttpGet("{id}")]
@@ -60,57 +78,42 @@ namespace Cyra.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
             }
         }
 
         // POST api/usuarios/register
+        [Authorize(Roles = "ADMIN")]
         [HttpPost]
-        public async Task<IActionResult> Crear([FromBody] UsuarioRegisterModel usuarioRegistro)
+        public async Task<IActionResult> Crear([FromBody] UsuarioRegisterModel usuarioRegistrado)
         {
-            var usuarioExistente = await _usuarioRepository.GetByEmailAsync(usuarioRegistro.Email);
-            if (usuarioExistente != null)
-                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "El email ya está registrado."));
-
-            var usuario = new Usuario
-            {
-                Nombre = usuarioRegistro.Nombre,
-                Email = usuarioRegistro.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(usuarioRegistro.Password),
-                Telefono = usuarioRegistro.Telefono,
-                Direccion = usuarioRegistro.Direccion,
-                TipoUsuario = usuarioRegistro.TipoUsuario
-            };
+            var usuarioExistente = await _usuarioRepository.GetByEmailAsync(usuarioRegistrado.Email);
+            if (usuarioExistente != null) return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Email ya registrado.", usuarioRegistrado));
 
             try
             {
-                var nuevoUsuario = await _usuarioRepository.AddAsync(usuario);
-
-                var responseModel = new UsuarioResponseModel
-                {
-                    IdUsuario = nuevoUsuario.IdUsuario,
-                    Nombre = nuevoUsuario.Nombre,
-                    Email = nuevoUsuario.Email,
-                    Telefono = nuevoUsuario.Telefono,
-                    Direccion = nuevoUsuario.Direccion,
-                    FechaCreacion = nuevoUsuario.FechaCreacion,
-                    Estado = nuevoUsuario.Estado.ToString(),
-                    TipoUsuario = nuevoUsuario.TipoUsuario
-                };
-
-                var apiResponse = ApiResponseHelper.GetResponse(ResponseType.Success, "Usuario creado exitosamente", responseModel);
-
-                return CreatedAtAction(nameof(GetById), new { id = nuevoUsuario.IdUsuario }, apiResponse);
+                var response = await _authService.RegisterAsync(usuarioRegistrado);
+                return Ok(ApiResponseHelper.GetResponse(ResponseType.Success, "Usuario registrado de manera correcta", response));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
             }
         }
 
         // PUT: api/usuario/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Actualizar(int id, [FromBody] UsuarioUpdateModel model)
+        public async Task<IActionResult> Actualizar(long id, [FromBody] UsuarioUpdateModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Model State is not valid", ModelState));
@@ -142,11 +145,17 @@ namespace Cyra.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
             }
             
         }
 
+        [Authorize(Roles = "ADMIN")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Eliminar(int id)
         {
@@ -161,7 +170,12 @@ namespace Cyra.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponseHelper.ExceptionResponse(ex));
+                var errorResponse = new ErrorResponse
+                {
+                    Message = "Ocurrió un error en el registro",
+                    Details = ex.Message
+                };
+                return BadRequest(ApiResponseHelper.GetResponse(ResponseType.Failure, "Error al registrar el usuario", errorResponse));
             }
         }
     }

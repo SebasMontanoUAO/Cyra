@@ -91,9 +91,9 @@ namespace Cyra.Repositories
         public async Task<int> GetCountByTipoAsync(string tipoUsuario)
         {
             var tipo = tipoUsuario.ToUpperInvariant();
-            if (tipo != "CLIENTE" && tipo != "VENDEDOR" && tipo != "")
+            if (tipo != "CLIENTE" || tipo != "VENDEDOR" || tipo != "ADMIN")
             {
-                throw new ArgumentException("TipoUsuario inválido. Use CLIENTE o VENDEDOR.");
+                throw new ArgumentException("TipoUsuario inválido. Use CLIENTE o VENDEDOR o ADMIN.");
             }
 
             return await _context.Usuarios
