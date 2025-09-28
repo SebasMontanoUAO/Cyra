@@ -77,6 +77,7 @@ namespace Cyra.Services
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Email = usuario.Email,
+                IdUsuario = usuario.IdUsuario,
                 Nombre = usuario.Nombre,
                 TipoUsuario = usuario.TipoUsuario
             };

@@ -73,6 +73,7 @@ namespace Cyra.Models
     public class AuthResponseModel
     {
         public string Token { get; set; }
+        public long IdUsuario { get; set; }
         public string Email { get; set; }
         public string Nombre { get; set; }
         public string TipoUsuario { get; set; }
