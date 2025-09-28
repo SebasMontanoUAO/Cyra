@@ -24,7 +24,7 @@ namespace Cyra.Controllers
             _authService = authService;
         }
 
-        [Authorize(Roles = "ADMIN")]
+        //[Authorize(Roles = "ADMIN")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
