@@ -38,7 +38,7 @@ namespace Cyra.Repositories
 
         public async Task<IEnumerable<Producto>> GetAllAsync()
         {
-            return await _context.Productos.ToListAsync();
+            return await _context.Productos.Include(p => p.Vendedor).ToListAsync();
         }
 
         public async Task<IEnumerable<Producto>> GetByCategoriaAsync(long idCategoria)
