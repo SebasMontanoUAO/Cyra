@@ -8,7 +8,7 @@ namespace Cyra.Repositories.Interfaces
         Task<Producto?> GetByIdWithDetailsAsync(long id);
         Task<IEnumerable<Producto>> GetAllAsync();
         Task<IEnumerable<Producto>> GetByVendedorAsync(long idVendedor);
-        Task<IEnumerable<Producto>> GetByEstadoAsync(string estado);  // Cambiar a string
+        Task<IEnumerable<Producto>> GetByEstadoAsync(string estado);  
         Task<IEnumerable<Producto>> GetByCategoriaAsync(long idCategoria);
         Task<IEnumerable<Producto>> GetActivosAsync();
         Task<IEnumerable<Producto>> SearchAsync(string searchTerm);
@@ -18,8 +18,8 @@ namespace Cyra.Repositories.Interfaces
         Task<Producto> UpdateAsync(Producto producto);
         Task<bool> DeleteAsync(long id);
         Task<bool> UpdateStockAsync(long idProducto, int nuevoStock);
-        Task<bool> UpdateEstadoAsync(long idProducto, string estado);  // Cambiar a string
+        Task<bool> UpdateEstadoAsync(long idProducto, string estado);  
         Task<int> GetCountByVendedorAsync(long idVendedor);
-        Task<int> GetCountByEstadoAsync(string estado);  // Cambiar a string
+        Task<int> GetCountByEstadoAsync(string estado);  
     }
 }
